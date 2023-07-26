@@ -180,8 +180,7 @@ class Router():
         self.url = url
 
     def match(self, pattern):
-        match = re.search(pattern, self.url)
-        if match:
+        if match := re.search(pattern, self.url):
             self.params = match.groupdict()
             return True
         else:
@@ -208,18 +207,13 @@ def redirect_to_poem(environ, start_response):
 
     # Read and parse the HTTP request body which is passed by the WSGI server
     request_body = environ['wsgi.input'].read(request_body_size)
-    poemtype = None
-    qs = parse_qs(request_body)
-    if qs:
-        poemtype = qs.get('poemtype')[0]
+    poemtype = qs.get('poemtype')[0] if (qs := parse_qs(request_body)) else None
     if poemtype != 'mushypoem':
         poemtype = 'poem'
 
     seed = os.urandom(8).encode('hex')
 
-    start_response('302 Found', [
-        ('Location', '/' + poemtype + '/' + seed)
-    ])
+    start_response('302 Found', [('Location', f'/{poemtype}/{seed}')])
 
     return []
 
